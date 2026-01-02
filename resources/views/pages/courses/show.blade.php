@@ -70,7 +70,7 @@
                                 <button type="button" class="submit btn text-purple me-2" data-bs-dismiss="modal">
                                     <i class="bi bi-arrow-left me-1"></i> Batalkan
                                 </button>
-                                <button type="button" class="back btn text-purple">
+                                <button type="submit" class="back btn text-purple">
                                     <i class="bi bi-save me-1"></i> Simpan
                                 </button>
                             </div>
@@ -461,41 +461,35 @@
 <script>
     const routes = {
         detail: "{{ route('courses.detail', $course->id) }}",
+        update: "{{ route('courses.update', $course->id) }}",
     }
 </script>
-<script src="{{ asset('js/helpers/formCheck.js') }}"></script>
+<script src="{{ asset('js/helpers/formHelper.js') }}"></script>
+<script src="{{ asset('js/helpers/requestHelper.js') }}"></script>
 <script>
-    let editCourseModal = document.getElementById('edit-course');
-    let editCourseForm = editCourseModal.querySelector('form')
+    const editCourseModal = document.getElementById('edit-course');
+    const editCourseForm = editCourseModal.querySelector('form')
 
-    editCourseModal.addEventListener('shown.bs.modal', async function () {
+    editCourseModal.addEventListener('shown.bs.modal', async () => {
         try {
-            let course = await fetchAndFillForm(routes.detail, editCourseForm);
+            const course = await requestHelper.fetchAndFillForm(routes.detail, editCourseForm);
+            formHelper.init(editCourseForm);
         } catch (error) {
             console.log(error);
         }
     });
 
-    function fetchAndFillForm(url, form) {
-        return fetch(url, {
-            headers: { Accept: 'application/json' }
-        })
-        .then(async res => {
-            const body = await res.json();
-            if (!res.ok) throw body;
-            return body;
-        })
-        .then(({ data }) => {
-            if (!data || !form) return null;
+    editCourseForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        if(formHelper.isFormChanged(editCourseForm)){
+            requestHelper.submitForm(routes.update, editCourseForm);
+        }
+        console.log('No change made');
+    });
 
-            Object.entries(data).forEach(([key, value]) => {
-                if (form.elements[key]) {
-                form.elements[key].value = value ?? '';
-                }
-            });
+    editCourseModal.addEventListener('hidden.bs.modal', () => {
+        formHelper.resetForm(editCourseForm);
+    });
 
-            return data;
-        });
-    }
 </script>
 @endpush

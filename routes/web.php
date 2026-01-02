@@ -45,6 +45,7 @@ Route::middleware(['auth', 'EnsureKeepExam'])
                 Route::get('/', 'index')->name('index'); // Page
                 Route::get('/all', 'all')->name('all');
                 Route::post('/store', 'store')->name('store');
+                Route::get('/create', 'create')->name('create');
                 Route::get('/{course}/show', 'show')->name('show'); // Page
                 Route::get('/{course}/detail', 'detail')->name('detail');
                 Route::put('/{course}/update', 'update')->name('update');
