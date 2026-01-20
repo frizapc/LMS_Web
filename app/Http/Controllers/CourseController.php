@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Resources\CourseResource;
 use App\Models\Course;
-use Error;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 
@@ -60,8 +60,14 @@ class CourseController extends Controller
         return view('pages.courses.show', compact('course'));
     }
 
-    public function detail(Course $course)
+    public function detail($id)
     {
+        $course = Course::find($id);
+
+        if(!$course) {
+            throw new ModelNotFoundException('Kursus tidak ditemukan');
+        }
+        
         return response()->json([
             'success' => true,
             'message' => 'Kursus ditemukan',
@@ -81,8 +87,14 @@ class CourseController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Course $course)
+    public function update(Request $request, $id)
     {   
+        $course = Course::find($id);
+
+        if(!$course) {
+            throw new ModelNotFoundException('Kursus tidak ditemukan');
+        }
+
         $request->validate([
             'name' => 'required|string|max:50|unique:courses,name,'.$course->id,
             'level' => 'required|string',
@@ -97,21 +109,32 @@ class CourseController extends Controller
             'photo' => $request->file('photo'),
         ]);
         
-        return redirect()
-            ->route('courses.show', $course->id)
-            ->with('success', 'Kursus berhasil diperbarui!');
+        return response()->json([
+            'success' => true,
+            'message' => 'Kursus Diubah',
+            'data' => new CourseResource($course),
+        ]);
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function delete(Course $course)
+    public function delete($id)
     {
+        $course = Course::find($id);
+        
+        if(!$course) {
+            throw new ModelNotFoundException('Kursus tidak ditemukan');
+        }
+
         Gate::authorize('delete', $course);
+
         $course->delete();
-        return redirect()
-            ->route('courses.index')
-            ->with('success', 'Kursus berhasil dihapus');
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Kursus Dihapus',
+        ]);
     }
 }
   
