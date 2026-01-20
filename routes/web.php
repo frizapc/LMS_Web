@@ -47,9 +47,9 @@ Route::middleware(['auth', 'EnsureKeepExam'])
                 Route::post('/store', 'store')->name('store');
                 Route::get('/create', 'create')->name('create');
                 Route::get('/{course}/show', 'show')->name('show'); // Page
-                Route::get('/{course}/detail', 'detail')->name('detail');
-                Route::put('/{course}/update', 'update')->name('update');
-                Route::delete('/{course}/delete', 'delete')->name('delete');
+                Route::get('/{id}/detail', 'detail')->name('detail');
+                Route::put('/{id}/update', 'update')->name('update');
+                Route::delete('/{id}/delete', 'delete')->name('delete');
             });
         
         Route::resource('courses.materials', MaterialController::class)
