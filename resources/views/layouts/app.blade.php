@@ -23,6 +23,14 @@
         
         <div class="main-content">
             <div class="main-wrapper">
+                <!-- Toast Notification -->
+                <div class="toast-container position-fixed bottom-0 end-0 p-3">
+                    <div id="liveToast" class="toast rounded-pill" role="alert" aria-live="assertive" aria-atomic="true"> 
+                        <div class="toast-body">
+                        </div>
+                    </div>
+                </div>
+
                 @yield('content')
             </div>
             @include('components.footer')
@@ -41,8 +49,16 @@
     
     <!-- Independent JS -->
     @stack('scripts')
-
+    <script src="{{ asset('js/helpers/toastHelper.js') }}"></script>
     <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const toast = toastHelper.restore();
+
+            if (toast) {
+                toastHelper.showToast(toast.success, toast.message);
+            }
+        });
+
         const pageStart = performance.now();
 
         window.addEventListener("load", () => {
