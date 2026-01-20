@@ -80,6 +80,41 @@
             </div>
         </div>
     </div>
+
+    <!-- Delete Course Modal  -->
+    <div id="delete-course" class="modal fade" tabindex="-1" aria-labelledby="delete-course" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="card shadow border-0">
+                    <div class="card-header bg-danger text-white d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">
+                            <i class="bi bi-pencil-square me-2"></i>Delete Kursus
+                        </h5>
+                    </div>
+                    
+                    <div class="card-body">
+                        <form method="POST">
+                            @csrf
+                            @method('DELETE')
+                
+                            <p class="text-danger">
+                                Apakah Anda yakin ingin menghapus kursus ini? Tindakan ini tidak dapat dipulihkan.
+                            </p>
+                            
+                            <div class="d-flex justify-content-end">
+                                <button type="button" class="submit btn btn-outline-dark me-2" data-bs-dismiss="modal">
+                                    <i class="bi bi-arrow-left me-1"></i> Batalkan
+                                </button>
+                                <button type="submit" class="back btn btn-outline-danger">
+                                    <i class="bi bi-trash me-1"></i> Hapus
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
     
     <div class="row">
         <!-- Kolom Foto -->
@@ -184,14 +219,9 @@
                                             <i class="bi bi-pencil-square me-1"></i> Edit Kursus
                                         </button>
                                         
-                                        <form action="{{ route('courses.delete', $course->id) }}" method="POST" class="d-inline">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" class="btn btn-outline-purple w-100 mt-2"
-                                                    onclick="return confirm('Hapus kursus {{ $course->name }}?')">
-                                                <i class="bi bi-trash me-1"></i> Hapus
-                                            </button>
-                                        </form>
+                                        <button type="button" class="btn btn-outline-purple w-100 mt-2" data-bs-toggle="modal" data-bs-target="#delete-course">
+                                            <i class="bi bi-trash me-1"></i> Hapus Kursus
+                                        </button>
                                         @endcan
                                     </div>
                                 </div>
@@ -460,19 +490,20 @@
 @push('scripts')
 <script>
     const routes = {
+        index: "{{ route('courses.index') }}",
         detail: "{{ route('courses.detail', $course->id) }}",
         update: "{{ route('courses.update', $course->id) }}",
+        delete: "{{ route('courses.delete', $course->id) }}",
     }
 </script>
 <script src="{{ asset('js/helpers/formHelper.js') }}"></script>
-<script src="{{ asset('js/helpers/requestHelper.js') }}"></script>
 <script>
     const editCourseModal = document.getElementById('edit-course');
-    const editCourseForm = editCourseModal.querySelector('form')
+    const editCourseForm = editCourseModal.querySelector('form');
 
     editCourseModal.addEventListener('shown.bs.modal', async () => {
         try {
-            const course = await requestHelper.fetchAndFillForm(routes.detail, editCourseForm);
+            const course = await formHelper.fetchAndFillForm(routes.detail, editCourseForm);
             formHelper.init(editCourseForm);
         } catch (error) {
             console.log(error);
@@ -481,14 +512,34 @@
 
     editCourseForm.addEventListener('submit', (e) => {
         e.preventDefault();
-        if(formHelper.isFormChanged(editCourseForm)){
-            requestHelper.submitForm(routes.update, editCourseForm);
-        }
-        console.log('No change made');
+        formHelper.submitForm(
+            routes.update, 
+            editCourseForm,
+            options = {
+                modal: editCourseModal,
+                beforeSubmit: true,
+            }
+        );
     });
 
     editCourseModal.addEventListener('hidden.bs.modal', () => {
         formHelper.resetForm(editCourseForm);
+    });
+
+    const deleteCourseModal = document.getElementById('delete-course');
+    const deleteCourseForm = deleteCourseModal.querySelector('form');
+
+    deleteCourseForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        formHelper.submitForm(
+            routes.delete, 
+            deleteCourseForm,
+            options = {
+                modal: deleteCourseModal,
+                beforeSubmit: false,
+                redirectUrl: routes.index,
+            }
+        );
     });
 
 </script>
