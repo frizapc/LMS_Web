@@ -4,6 +4,7 @@ namespace App\Exceptions;
 
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Validation\ValidationException;
 use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 use Throwable;
 
@@ -11,7 +12,7 @@ class ErrorHandler
 {
     public function handler(Throwable $exception, ?string $message = null)
     {
-        if (request()->expectsJson()) {
+        if (request()->expectsJson()) { 
             return $this->jsonResponse($exception, $message);
         }
 
@@ -45,16 +46,21 @@ class ErrorHandler
      */
     private function resolveStatusCode(Throwable $e): int
     {
+
         if ($e instanceof HttpExceptionInterface) {
             return $e->getStatusCode();
+        }
+
+        if ($e instanceof AuthenticationException) {
+            return 401;
         }
 
         if ($e instanceof ModelNotFoundException) {
             return 404;
         }
 
-        if ($e instanceof AuthenticationException) {
-            return 401;
+        if ($e instanceof ValidationException) {
+            return 400;
         }
 
         return 500; // default
